@@ -24,7 +24,7 @@ public class TaskController {
     public List<Task> taskCheck(){
 //
 
-        return taskService.getAllTasks();;
+        return taskService.getAllTasks();
     }
     @PostMapping("/task")
     public Task createTask(@RequestBody Task newTask){
