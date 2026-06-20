@@ -1,6 +1,7 @@
 package com.Shubham.task_manager;
 import com.Shubham.task_manager.service.TaskService;
 import com.Shubham.task_manager.model.Task;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,7 @@ public class TaskController {
         return taskService.getAllTasks();
     }
     @PostMapping("/task")
-    public Task createTask(@RequestBody Task newTask){
+    public Task createTask(@Valid @RequestBody Task newTask){
 //
         return taskService.createTask(newTask);
     }
