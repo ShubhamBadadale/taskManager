@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Spring Boot Task Client</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 450px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #0f172a;
+        color: #f8fafc;
+      }
+      .card {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      }
+      .input-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      input {
+        flex: 1;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #475569;
+        background: #0f172a;
+        color: white;
+      }
+      button {
+        padding: 10px 16px;
+        border-radius: 6px;
+        border: none;
+        background: #3b82f6;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #2563eb;
+      }
+      .task-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: #334155;
+        border-radius: 6px;
+      }
+      .del-btn {
+        background: #ef4444;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>⚡ Task Engine UI</h2>
+
+      <div class="input-group">
+        <input
+          type="text"
+          id="taskInput"
+          placeholder="Enter a Spring Boot task..."
+        />
+        <button onclick="sendTask()">Add Task</button>
+      </div>
+
+      <div id="taskContainer"></div>
+    </div>
+
+    <script>
+      // Keep whichever URL worked for your browser! (localhost or 127.0.0.1)
+      const BACKEND_URL = "http://127.0.0.1:8080/tasks";
+
+      // 1. READ ALL (GET)
+      async function fetchTasks() {
+        const response = await fetch(BACKEND_URL);
+        const tasks = await response.json();
+
+        const container = document.getElementById("taskContainer");
+        container.innerHTML = "";
+
+        tasks.forEach((task) => {
+          container.innerHTML += `
+                <div class="task-item">
+                    <span>${task.title}</span>
+                    <div>
+                        <button onclick="editTask(${task.id})" style="background: #eab308; padding: 6px 10px; font-size: 12px; margin-right: 4px;">Edit</button>
+                        <button class="del-btn" onclick="removeTask(${task.id})">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+      }
+
+      // 2. CREATE (POST)
+      async function sendTask() {
+        const input = document.getElementById("taskInput");
+        if (!input.value) return;
+
+        await fetch(BACKEND_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: input.value, completed: false }),
+        });
+
+        input.value = "";
+        fetchTasks();
+      }
+
+      // 3. UPDATE (PUT) <--- THE NEW LEVER!
+      async function editTask(id) {
+        const newTitle = prompt("Enter updated task name:");
+
+        // If the user clicked 'Cancel' or left it blank, do nothing
+        if (!newTitle || newTitle.trim() === "") return;
+
+        await fetch(`${BACKEND_URL}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: newTitle, completed: false }),
+        });
+
+        fetchTasks(); // Ask Java for the refreshed list
+      }
+
+      // 4. DELETE
+      async function removeTask(id) {
+        await fetch(`${BACKEND_URL}/${id}`, { method: "DELETE" });
+        fetchTasks();
+      }
+
+      fetchTasks();
+    </script>
+  </body>
+</html>
